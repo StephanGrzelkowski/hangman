@@ -1,0 +1,12 @@
+---
+:secret_word: strains
+:known:
+- _
+- _
+- _
+- _
+- _
+- _
+- _
+:tries: 6
+:questioned: []
