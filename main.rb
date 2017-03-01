@@ -1,14 +1,27 @@
+require 'yaml'
+
 class HangmanAi
 	attr_accessor :secret_word, :known, :questioned
 
 	def initialize()
-		@secret_word = HangmanAi.get_word()
-		@tries = 6 
-		@known = []
-		@secret_word.length.times do 
-			@known << "_"
+		puts "Do you want to load a recent game (type \"s\") or do you want to start a new one (type \"n\")?"
+		o = gets.strip.downcase
+		if o === "n"	
+			@secret_word = HangmanAi.get_word()	
+			@tries = 6 
+			@known = []
+			@secret_word.length.times do 
+				@known << "_"
+			end
+			@questioned = []	
+
+		elsif o === "s"
+			data = HangmanAi.load_game()
+			@secret_word = data[:secret_word]
+			@known = data[:known]
+			@tries = data[:tries]
+			@questioned = data[:questioned]
 		end
-		@questioned = []
 	end 
 
 	def HangmanAi.get_word()
@@ -17,7 +30,8 @@ class HangmanAi
 			words << word.strip if (word.strip.length > 4 && word.strip.length < 12)
 		end
 		rand_select = rand(words.length).to_i
-		secret_word = words[rand_select]
+		@secret_word = words[rand_select]
+		
 	end	
 
 	def display_man()
@@ -44,7 +58,7 @@ class HangmanAi
 				i += 1
 			end
 			puts "Yes you have got one"
-
+			@questioned << letter
 		else 
 			puts "Nope, that's not in there"
 			@questioned << letter
@@ -56,13 +70,31 @@ class HangmanAi
 		puts("Which letter do you want to try?")
 		letter = gets.strip
 	end
+
+	def save_game()
+		
+		saveDat = {:secret_word => @secret_word, :known => @known, :tries => @tries, :questioned => @questioned} 
+		
+		t = File.open("hangman_save.txt","w")
+		t.puts YAML.dump(saveDat)
+		t.close
+	end
+
+	def HangmanAi.load_game()
+		t = File.open("hangman_save.txt","r") do |saveDat|
+			data = YAML.load(saveDat)
+			
+		end
+	end
+
 end
 
 game = HangmanAi.new	
 finished = false 
+game.display_man
 while !finished
-	game.display_man
 	letter = game.get_input
 	game.update_known(letter) 
 	finished = game.display_man
+	game.save_game
 end
